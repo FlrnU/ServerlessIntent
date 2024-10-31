@@ -6,7 +6,11 @@ import org.example.model.Intent;
 
 public class ServicePipelineFinder {
 
-    // Enhanced ServiceNode to track more transformation details
+
+    private ServicePipelineFinder(){
+        throw new IllegalStateException("Utility Class");
+    }
+
     static class ServiceNode {
 
         CloudService service;
@@ -14,6 +18,7 @@ public class ServicePipelineFinder {
         String currentOutputType;
         String currentInputLanguage;
         String currentOutputLanguage;
+        String currentProvider; // Added to track the provider
         List<CloudService> currentPipeline;
 
         public ServiceNode(CloudService service,
@@ -27,14 +32,13 @@ public class ServicePipelineFinder {
             this.currentOutputType = outputType;
             this.currentInputLanguage = inputLanguage;
             this.currentOutputLanguage = outputLanguage;
+            this.currentProvider = service.getProvider(); // Store the provider
 
-            // Only create a new pipeline with a copy of previous pipeline if previous pipeline is not empty
             this.currentPipeline = previousPipeline.isEmpty()
                                    ? new ArrayList<>(
                 Collections.singletonList(service))
                                    : new ArrayList<>(previousPipeline);
 
-            // Only add the current service if it's not already the last service in the pipeline
             if (!previousPipeline.isEmpty() &&
                 !previousPipeline.get(previousPipeline.size() - 1)
                                  .equals(service)) {
@@ -48,7 +52,6 @@ public class ServicePipelineFinder {
         Queue<ServiceNode> queue = new LinkedList<>();
         Set<String> visited = new HashSet<>();
 
-        // Extract initial services filtering to separate method
         initializeQueueWithStartingServices(services, intent, queue, visited);
 
         while (!queue.isEmpty()) {
@@ -58,8 +61,19 @@ public class ServicePipelineFinder {
                 return currentNode.currentPipeline;
             }
 
-            // Explore possible next services
-            for (CloudService nextService : services) {
+            // First try to find matching services from the same provider
+            List<CloudService> sameProviderServices =
+                findMatchingServicesFromProvider(
+                    services,
+                    currentNode.currentProvider
+                );
+
+            // If no matching services from same provider, use all services
+            List<CloudService> servicesToTry = !sameProviderServices.isEmpty()
+                                               ? sameProviderServices
+                                               : services;
+
+            for (CloudService nextService : servicesToTry) {
                 boolean inputTypeMatch = nextService.getInputFormat().stream()
                                                     .anyMatch(
                                                         format -> format.equalsIgnoreCase(
@@ -83,7 +97,6 @@ public class ServicePipelineFinder {
                         nextService,
                         currentNode.currentOutputType,
                         nextService.getOutputFormat().get(0),
-                        // Assume first output format
                         currentNode.currentOutputLanguage,
                         potentialOutputLanguage,
                         currentNode.currentPipeline
@@ -99,6 +112,16 @@ public class ServicePipelineFinder {
         }
 
         return Collections.emptyList();
+    }
+
+    private static List<CloudService> findMatchingServicesFromProvider(
+        List<CloudService> services,
+        String provider
+    ) {
+        return services.stream()
+                       .filter(
+                           service -> service.getProvider().equals(provider))
+                       .toList();
     }
 
     private static void initializeQueueWithStartingServices(
@@ -139,7 +162,6 @@ public class ServicePipelineFinder {
         CloudService service,
         Intent intent
     ) {
-        // If service supports translation, use target language
         if (service.getFeatures().contains("Translation")) {
             return intent.getOutputLanguage();
         }
@@ -151,7 +173,6 @@ public class ServicePipelineFinder {
         String potentialOutputLanguage,
         Intent intent
     ) {
-        // Check language transformation rules
         return potentialOutputLanguage.equalsIgnoreCase(
             intent.getOutputLanguage()) ||
                potentialOutputLanguage.equalsIgnoreCase(currentLanguage);
@@ -162,6 +183,7 @@ public class ServicePipelineFinder {
                node.currentInputType + "|" +
                node.currentOutputType + "|" +
                node.currentInputLanguage + "|" +
-               node.currentOutputLanguage;
+               node.currentOutputLanguage + "|" +
+               node.currentProvider; // Added provider to visit key
     }
 }
