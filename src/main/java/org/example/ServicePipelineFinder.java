@@ -18,7 +18,7 @@ public class ServicePipelineFinder {
         String currentOutputType;
         String currentInputLanguage;
         String currentOutputLanguage;
-        String currentProvider; // Added to track the provider
+        String currentProvider;
         List<CloudService> currentPipeline;
 
         public ServiceNode(CloudService service,
@@ -32,7 +32,7 @@ public class ServicePipelineFinder {
             this.currentOutputType = outputType;
             this.currentInputLanguage = inputLanguage;
             this.currentOutputLanguage = outputLanguage;
-            this.currentProvider = service.getProvider(); // Store the provider
+            this.currentProvider = service.getProvider();
 
             this.currentPipeline = previousPipeline.isEmpty()
                                    ? new ArrayList<>(
@@ -184,6 +184,6 @@ public class ServicePipelineFinder {
                node.currentOutputType + "|" +
                node.currentInputLanguage + "|" +
                node.currentOutputLanguage + "|" +
-               node.currentProvider; // Added provider to visit key
+               node.currentProvider;
     }
 }
