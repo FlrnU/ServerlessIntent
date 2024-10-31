@@ -28,15 +28,24 @@ public class ServicePipelineFinder {
             this.currentInputLanguage = inputLanguage;
             this.currentOutputLanguage = outputLanguage;
 
-            // Create a new pipeline by copying previous and adding current service
-            this.currentPipeline = new ArrayList<>(previousPipeline);
-            this.currentPipeline.add(service);
+            // Only create a new pipeline with a copy of previous pipeline if previous pipeline is not empty
+            this.currentPipeline = previousPipeline.isEmpty()
+                                   ? new ArrayList<>(
+                Collections.singletonList(service))
+                                   : new ArrayList<>(previousPipeline);
+
+            // Only add the current service if it's not already the last service in the pipeline
+            if (!previousPipeline.isEmpty() &&
+                !previousPipeline.get(previousPipeline.size() - 1)
+                                 .equals(service)) {
+                this.currentPipeline.add(service);
+            }
         }
     }
 
     public static List<CloudService> findPipeline(List<CloudService> services,
                                                   Intent intent) {
-        // Enhanced pipeline finding with more flexible transformations
+
         Queue<ServiceNode> queue = new LinkedList<>();
         Set<String> visited = new HashSet<>();
 
@@ -60,7 +69,6 @@ public class ServicePipelineFinder {
             }
         }
 
-        // Expanded BFS with more comprehensive path finding
         while (!queue.isEmpty()) {
             ServiceNode currentNode = queue.poll();
 
@@ -112,7 +120,7 @@ public class ServicePipelineFinder {
             }
         }
 
-        return Collections.emptyList();  // No valid pipeline found
+        return Collections.emptyList();
     }
 
     private static boolean isPipelineComplete(ServiceNode node, Intent intent) {

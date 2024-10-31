@@ -91,7 +91,7 @@ public class ServiceCreator {
             "VisionServices",
             "Google Cloud Vision",
             "GCP",
-            Arrays.asList("JPG", "PNG", "GIF", "PDF"),
+            Arrays.asList("JPG", "PNG", "GIF"),
             Arrays.asList("Text", "JSON"),
             Arrays.asList("Labels", "Objects"),
             googleVisionLimits
