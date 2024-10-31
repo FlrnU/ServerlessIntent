@@ -45,54 +45,32 @@ public class ServicePipelineFinder {
 
     public static List<CloudService> findPipeline(List<CloudService> services,
                                                   Intent intent) {
-
         Queue<ServiceNode> queue = new LinkedList<>();
         Set<String> visited = new HashSet<>();
 
-        // Start with initial services matching input type
-        for (CloudService initialService : services) {
-            if (initialService.getInputFormat().stream()
-                              .anyMatch(format -> format.equalsIgnoreCase(
-                                  intent.getInputType()))) {
-
-                ServiceNode startNode = new ServiceNode(
-                    initialService,
-                    intent.getInputType(),
-                    intent.getInputType(),
-                    intent.getInputLanguage(),
-                    intent.getInputLanguage(),
-                    new ArrayList<>()
-                );
-
-                queue.add(startNode);
-                visited.add(createVisitKey(startNode));
-            }
-        }
+        // Extract initial services filtering to separate method
+        initializeQueueWithStartingServices(services, intent, queue, visited);
 
         while (!queue.isEmpty()) {
             ServiceNode currentNode = queue.poll();
 
-            // Check if current pipeline meets the final requirement
             if (isPipelineComplete(currentNode, intent)) {
                 return currentNode.currentPipeline;
             }
 
             // Explore possible next services
             for (CloudService nextService : services) {
-                // Check if next service can accept current output
                 boolean inputTypeMatch = nextService.getInputFormat().stream()
                                                     .anyMatch(
                                                         format -> format.equalsIgnoreCase(
                                                             currentNode.currentOutputType));
 
-                // Determine potential output language
                 String potentialOutputLanguage = determineOutputLanguage(
                     currentNode.currentOutputLanguage,
                     nextService,
                     intent
                 );
 
-                // Validate language transformation
                 boolean languageTransformationValid =
                     isLanguageTransformationValid(
                         currentNode.currentOutputLanguage,
@@ -121,6 +99,32 @@ public class ServicePipelineFinder {
         }
 
         return Collections.emptyList();
+    }
+
+    private static void initializeQueueWithStartingServices(
+        List<CloudService> services,
+        Intent intent,
+        Queue<ServiceNode> queue,
+        Set<String> visited
+    ) {
+        for (CloudService initialService : services) {
+            if (initialService.getInputFormat().stream()
+                              .anyMatch(format -> format.equalsIgnoreCase(
+                                  intent.getInputType()))) {
+
+                ServiceNode startNode = new ServiceNode(
+                    initialService,
+                    intent.getInputType(),
+                    intent.getInputType(),
+                    intent.getInputLanguage(),
+                    intent.getInputLanguage(),
+                    new ArrayList<>()
+                );
+
+                queue.add(startNode);
+                visited.add(createVisitKey(startNode));
+            }
+        }
     }
 
     private static boolean isPipelineComplete(ServiceNode node, Intent intent) {
