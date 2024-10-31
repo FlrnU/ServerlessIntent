@@ -1,0 +1,8 @@
+{
+  "inputType": "text",
+  "inputLanguage": "German",
+  "outputType": "mp3",
+  "outputLanguage": "Spanish",
+  "inputFilePath": "input.txt",
+  "bucketName": "hello-12345"
+}
