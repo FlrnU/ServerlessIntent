@@ -1,124 +1,155 @@
 package org.example;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 import org.example.model.CloudService;
 import org.example.model.Intent;
 
 public class ServicePipelineFinder {
 
-    // Class to represent a graph node connecting Cloud Services
+    // Enhanced ServiceNode to track more transformation details
     static class ServiceNode {
 
         CloudService service;
+        String currentInputType;
         String currentOutputType;
+        String currentInputLanguage;
         String currentOutputLanguage;
-        ServiceNode parent;
+        List<CloudService> currentPipeline;
 
-        public ServiceNode(CloudService service, String currentOutputType,
-                           String currentOutputLanguage, ServiceNode parent) {
+        public ServiceNode(CloudService service,
+                           String inputType,
+                           String outputType,
+                           String inputLanguage,
+                           String outputLanguage,
+                           List<CloudService> previousPipeline) {
             this.service = service;
-            this.currentOutputType = currentOutputType;
-            this.currentOutputLanguage = currentOutputLanguage;
-            this.parent = parent;
+            this.currentInputType = inputType;
+            this.currentOutputType = outputType;
+            this.currentInputLanguage = inputLanguage;
+            this.currentOutputLanguage = outputLanguage;
+
+            // Create a new pipeline by copying previous and adding current service
+            this.currentPipeline = new ArrayList<>(previousPipeline);
+            this.currentPipeline.add(service);
         }
     }
 
-    // Method to create a pipeline
     public static List<CloudService> findPipeline(List<CloudService> services,
                                                   Intent intent) {
-        boolean needsTranslation = !intent.getInputLanguage().equalsIgnoreCase(
-            intent.getOutputLanguage());
-
-        // Queue for BFS search
+        // Enhanced pipeline finding with more flexible transformations
         Queue<ServiceNode> queue = new LinkedList<>();
-
-        // Set to store visited nodes
         Set<String> visited = new HashSet<>();
 
-        // Start search by adding all services that support the desired input type and input language
-        for (CloudService service : services) {
-            if (service.getInputFormat().stream().anyMatch(
-                i -> i.equalsIgnoreCase(intent.getInputType()))) {
-                queue.add(new ServiceNode(service, intent.getInputType(),
-                                          intent.getInputLanguage(), null));
-                visited.add(getVisitedKey(service, intent.getInputType(),
-                                          intent.getInputLanguage()));
+        // Start with initial services matching input type
+        for (CloudService initialService : services) {
+            if (initialService.getInputFormat().stream()
+                              .anyMatch(format -> format.equalsIgnoreCase(
+                                  intent.getInputType()))) {
+
+                ServiceNode startNode = new ServiceNode(
+                    initialService,
+                    intent.getInputType(),
+                    intent.getInputType(),
+                    intent.getInputLanguage(),
+                    intent.getInputLanguage(),
+                    new ArrayList<>()
+                );
+
+                queue.add(startNode);
+                visited.add(createVisitKey(startNode));
             }
         }
 
-        // BFS loop
+        // Expanded BFS with more comprehensive path finding
         while (!queue.isEmpty()) {
             ServiceNode currentNode = queue.poll();
-            CloudService currentService = currentNode.service;
 
-            // Check if the current service provides the desired output type and output language
-            boolean outputMatches = currentService.getOutputFormat().stream()
-                                                  .anyMatch(
-                                                      i -> i.equalsIgnoreCase(
-                                                          intent.getOutputType()));
-            boolean languageMatches =
-                currentNode.currentOutputLanguage.equalsIgnoreCase(
-                    intent.getOutputLanguage());
-
-            // Additional check if translation is needed
-            boolean translationMatches =
-                !needsTranslation || (needsTranslation &&
-                                      currentService.getFeatures()
-                                                    .contains("Translation") &&
-                                      currentNode.currentOutputLanguage.equalsIgnoreCase(
-                                          intent.getInputLanguage()));
-
-            if (outputMatches && languageMatches && translationMatches) {
-                // If found, return the entire pipeline
-                List<CloudService> pipeline = new ArrayList<>();
-                while (currentNode != null) {
-                    pipeline.add(0, currentNode.service);
-                    currentNode = currentNode.parent;
-                }
-                return pipeline;
+            // Check if current pipeline meets the final requirement
+            if (isPipelineComplete(currentNode, intent)) {
+                return currentNode.currentPipeline;
             }
 
-            // Otherwise, find all possible next services that accept the output of the current service as input
+            // Explore possible next services
             for (CloudService nextService : services) {
-                for (String nextInputType : nextService.getInputFormat()) {
-                    if (currentService.getOutputFormat()
-                                      .contains(nextInputType) &&
-                        !visited.contains(
-                            getVisitedKey(nextService, nextInputType,
-                                          currentNode.currentOutputLanguage))) {
+                // Check if next service can accept current output
+                boolean inputTypeMatch = nextService.getInputFormat().stream()
+                                                    .anyMatch(
+                                                        format -> format.equalsIgnoreCase(
+                                                            currentNode.currentOutputType));
 
-                        // Determine the next output language
-                        String nextOutputLanguage =
-                            currentNode.currentOutputLanguage;
-                        if (nextService.getFeatures().contains("Translation")) {
-                            nextOutputLanguage = intent.getOutputLanguage();
-                        }
+                // Determine potential output language
+                String potentialOutputLanguage = determineOutputLanguage(
+                    currentNode.currentOutputLanguage,
+                    nextService,
+                    intent
+                );
 
-                        // Add the next service to the queue
-                        queue.add(new ServiceNode(nextService, nextInputType,
-                                                  nextOutputLanguage,
-                                                  currentNode));
-                        visited.add(getVisitedKey(nextService, nextInputType,
-                                                  nextOutputLanguage));
+                // Validate language transformation
+                boolean languageTransformationValid =
+                    isLanguageTransformationValid(
+                        currentNode.currentOutputLanguage,
+                        potentialOutputLanguage,
+                        intent
+                    );
+
+                if (inputTypeMatch && languageTransformationValid) {
+                    ServiceNode nextNode = new ServiceNode(
+                        nextService,
+                        currentNode.currentOutputType,
+                        nextService.getOutputFormat().get(0),
+                        // Assume first output format
+                        currentNode.currentOutputLanguage,
+                        potentialOutputLanguage,
+                        currentNode.currentPipeline
+                    );
+
+                    String visitKey = createVisitKey(nextNode);
+                    if (!visited.contains(visitKey)) {
+                        queue.add(nextNode);
+                        visited.add(visitKey);
                     }
                 }
             }
         }
 
-        // If no path was found, return an empty list
-        return Collections.emptyList();
+        return Collections.emptyList();  // No valid pipeline found
     }
 
-    // Helper method to create a unique key for visited nodes
-    private static String getVisitedKey(CloudService service, String outputType,
-                                        String outputLanguage) {
-        return service.getName() + "|" + outputType + "|" + outputLanguage;
+    private static boolean isPipelineComplete(ServiceNode node, Intent intent) {
+        return
+            node.currentOutputType.equalsIgnoreCase(intent.getOutputType()) &&
+            node.currentOutputLanguage.equalsIgnoreCase(
+                intent.getOutputLanguage());
+    }
+
+    private static String determineOutputLanguage(
+        String currentLanguage,
+        CloudService service,
+        Intent intent
+    ) {
+        // If service supports translation, use target language
+        if (service.getFeatures().contains("Translation")) {
+            return intent.getOutputLanguage();
+        }
+        return currentLanguage;
+    }
+
+    private static boolean isLanguageTransformationValid(
+        String currentLanguage,
+        String potentialOutputLanguage,
+        Intent intent
+    ) {
+        // Check language transformation rules
+        return potentialOutputLanguage.equalsIgnoreCase(
+            intent.getOutputLanguage()) ||
+               potentialOutputLanguage.equalsIgnoreCase(currentLanguage);
+    }
+
+    private static String createVisitKey(ServiceNode node) {
+        return node.service.getName() + "|" +
+               node.currentInputType + "|" +
+               node.currentOutputType + "|" +
+               node.currentInputLanguage + "|" +
+               node.currentOutputLanguage;
     }
 }
-
