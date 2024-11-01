@@ -27,14 +27,9 @@ public class Main {
             e.printStackTrace();
         }
 
-        services.forEach(
-            x -> System.out.println(x.toString())
-        );
-
         List<CloudService> pipeline =
             findPipeline(services, intent);
 
-        // Print the found pipeline
         if (pipeline.isEmpty()) {
             System.out.println(
                 "No pipeline found that supports the desired transformation process.");
@@ -44,5 +39,11 @@ public class Main {
                 System.out.println(service.getName());
             }
         }
+
+        String apiKey =
+            "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";
+        ChatGPTExecutor executor =
+            new ChatGPTExecutor(apiKey, intent, pipeline);
+        executor.process();
     }
 }
