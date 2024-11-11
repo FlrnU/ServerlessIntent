@@ -6,7 +6,7 @@ import java.util.List;
 import org.example.model.CloudService;
 import org.example.model.ServiceLimits;
 
-public class ServiceCreator {
+public class ServiceRegistry {
 
     public static List<CloudService> createServices() {
         List<CloudService> serviceList = new ArrayList<>();

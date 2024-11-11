@@ -1,6 +1,6 @@
 package org.example;
 
-import static org.example.ServicePipelineFinder.findPipeline;
+import static org.example.OrchestratorModule.findPipeline;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
@@ -16,7 +16,7 @@ public class Main {
         String filePath = "./input.json";
         Intent intent = null;
 
-        List<CloudService> services = ServiceCreator.createServices();
+        List<CloudService> services = ServiceRegistry.createServices();
 
         try {
             intent =

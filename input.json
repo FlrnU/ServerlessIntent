@@ -1,8 +1,8 @@
 {
-  "inputType": "text",
-  "inputLanguage": "German",
+  "inputType": "pdf",
+  "inputLanguage": "English",
   "outputType": "mp3",
-  "outputLanguage": "Spanish",
-  "inputFilePath": "input.txt",
+  "outputLanguage": "German",
+  "inputFilePath": "input.pdf",
   "bucketName": "hello-12345"
 }

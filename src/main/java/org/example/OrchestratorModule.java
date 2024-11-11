@@ -4,10 +4,10 @@ import java.util.*;
 import org.example.model.CloudService;
 import org.example.model.Intent;
 
-public class ServicePipelineFinder {
+public class OrchestratorModule {
 
 
-    private ServicePipelineFinder(){
+    private OrchestratorModule(){
         throw new IllegalStateException("Utility Class");
     }
 
