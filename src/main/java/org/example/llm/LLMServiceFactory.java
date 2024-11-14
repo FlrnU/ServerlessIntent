@@ -13,8 +13,8 @@ public class LLMServiceFactory {
         String normalizedType = serviceType.toLowerCase();
         return switch (normalizedType) {
             case "openai" -> new OpenAiLLMService(apiKey);
-            case "claude" -> new ClaudeLLMService(Region.US_WEST_2.toString(),
-                                                  "anthropic.claude-3-5-sonnet-20241022-v2:0");
+            case "claude" -> new ClaudeLLMService(Region.US_EAST_1.toString(),
+                                                  "us.anthropic.claude-3-5-sonnet-20241022-v2:0");
             case "llama" -> new LlamaLLMService(Region.US_EAST_1.toString(),
                                                 "us.meta.llama3-1-70b-instruct-v1:0");
             case "llama3.2" ->
