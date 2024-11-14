@@ -16,8 +16,6 @@ public class Main {
         String filePath = "./input.json";
         Intent intent = null;
 
-        List<CloudService> services = ServiceRegistry.createServices();
-
         try {
             intent =
                 objectMapper.readValue(new File(filePath), Intent.class);
@@ -26,6 +24,9 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        List<CloudService> services =
+            ServiceRegistry.createServicesFromJson(intent.getServiceFilePath());
 
         List<CloudService> pipeline =
             findPipeline(services, intent);
@@ -41,9 +42,11 @@ public class Main {
         }
 
         String apiKey =
-            "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";
-        ChatGPTExecutor executor =
-            new ChatGPTExecutor(apiKey, intent, pipeline);
+            "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";
+        LLMService llmService =
+            LLMServiceFactory.getLLMService(intent.getLlmProvider(), apiKey);
+        LLMRequestExecutor executor =
+            new LLMRequestExecutor(llmService, intent, pipeline);
         executor.process();
     }
 }

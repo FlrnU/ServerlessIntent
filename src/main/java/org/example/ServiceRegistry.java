@@ -1,138 +1,62 @@
 package org.example;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.model.CloudService;
 import org.example.model.ServiceLimits;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 public class ServiceRegistry {
 
-    public static List<CloudService> createServices() {
+    public static List<CloudService> createServicesFromJson(String filePath) {
         List<CloudService> serviceList = new ArrayList<>();
+        ObjectMapper objectMapper = new ObjectMapper();
 
-        ServiceLimits googleTranslateLimits =
-            new ServiceLimits(30000, "characters");
-        CloudService gcpTranslate = CloudServiceFactory.createService(
-            "TextServices",
-            "Google Cloud Translate",
-            "GCP",
-            Arrays.asList("Text", "HTML"),
-            Arrays.asList("Text", "HTML"),
-            Arrays.asList("Translation"),
-            googleTranslateLimits
-        );
-        serviceList.add(gcpTranslate);
+        try {
+            // Read and parse JSON file into a List of Maps
+            List<Map<String, Object>> services =
+                objectMapper.readValue(new File(filePath), List.class);
 
-        ServiceLimits awsTranslateLimits = new ServiceLimits(10, "KB");
-        CloudService awsTranslate = CloudServiceFactory.createService(
-            "TextServices",
-            "AWS Translate",
-            "AWS",
-            Arrays.asList("Text", "HTML"),
-            Arrays.asList("Text", "HTML"),
-            Arrays.asList("Translation"),
-            awsTranslateLimits
-        );
-        serviceList.add(awsTranslate);
+            // Iterate over each service map and create CloudService objects
+            for (Map<String, Object> serviceMap : services) {
+                String category = (String) serviceMap.get("category");
+                String name = (String) serviceMap.get("name");
+                String provider = (String) serviceMap.get("provider");
+                List<String> inputFormats =
+                    (List<String>) serviceMap.get("inputFormats");
+                List<String> outputFormats =
+                    (List<String>) serviceMap.get("outputFormats");
+                List<String> capabilities =
+                    (List<String>) serviceMap.get("capabilities");
+                Map<String, Object> limitsMap =
+                    (Map<String, Object>) serviceMap.get("limits");
 
-        ServiceLimits googleTextToSpeechLimits =
-            new ServiceLimits(5000, "characters");
-        CloudService googleTextToSpeech = CloudServiceFactory.createService(
-            "SpeechServices",
-            "Google Cloud Text-to-Speech",
-            "GCP",
-            Arrays.asList("Text"),
-            Arrays.asList("MP3", "WAV", "OGG"),
-            Arrays.asList("T2S"),
-            googleTextToSpeechLimits
-        );
-        serviceList.add(googleTextToSpeech);
+                int limitValue = (int) limitsMap.get("value");
+                String limitUnit = (String) limitsMap.get("unit");
+                ServiceLimits serviceLimits =
+                    new ServiceLimits(limitValue, limitUnit);
 
-        ServiceLimits awsPollyLimits = new ServiceLimits(100000, "characters");
-        CloudService awsPolly = CloudServiceFactory.createService(
-            "SpeechServices",
-            "AWS Polly",
-            "AWS",
-            Arrays.asList("Text", "SSML"),
-            Arrays.asList("MP3", "PCM"),
-            Arrays.asList("T2S"),
-            awsPollyLimits
-        );
-        serviceList.add(awsPolly);
+                // Create CloudService object using a factory method or constructor
+                CloudService cloudService = CloudServiceFactory.createService(
+                    category,
+                    name,
+                    provider,
+                    inputFormats,
+                    outputFormats,
+                    capabilities,
+                    serviceLimits
+                );
 
-        ServiceLimits googleSpeechToTextLimits =
-            new ServiceLimits(480, "minutes");
-        CloudService googleSpeechToText = CloudServiceFactory.createService(
-            "SpeechServices",
-            "Google Cloud Speech-to-Text",
-            "GCP",
-            Arrays.asList("FLAC", "WAV", "MP3"),
-            Arrays.asList("Text"),
-            Arrays.asList("S2T"),
-            googleSpeechToTextLimits
-        );
-        serviceList.add(googleSpeechToText);
-
-        ServiceLimits awsTranscribeLimits = new ServiceLimits(4, "hours");
-        CloudService awsTranscribe = CloudServiceFactory.createService(
-            "SpeechServices",
-            "AWS Transcribe",
-            "AWS",
-            Arrays.asList("MP3", "WAV", "FLAC"),
-            Arrays.asList("Text", "SRT", "VTT"),
-            Arrays.asList("S2T"),
-            awsTranscribeLimits
-        );
-        serviceList.add(awsTranscribe);
-
-        ServiceLimits googleVisionLimits = new ServiceLimits(20, "MB");
-        CloudService googleVision = CloudServiceFactory.createService(
-            "VisionServices",
-            "Google Cloud Vision",
-            "GCP",
-            Arrays.asList("JPG", "PNG", "GIF"),
-            Arrays.asList("Text", "JSON"),
-            Arrays.asList("Labels", "Objects"),
-            googleVisionLimits
-        );
-        serviceList.add(googleVision);
-
-        ServiceLimits awsRekognitionLimits = new ServiceLimits(5, "MB");
-        CloudService awsRekognition = CloudServiceFactory.createService(
-            "VisionServices",
-            "AWS Rekognition",
-            "AWS",
-            Arrays.asList("JPG", "PNG", "MP4"),
-            Arrays.asList("JSON"),
-            Arrays.asList("Face", "Labels"),
-            awsRekognitionLimits
-        );
-        serviceList.add(awsRekognition);
-
-        ServiceLimits awsTextractLimits = new ServiceLimits(500, "MB");
-        CloudService awsTextract = CloudServiceFactory.createService(
-            "DocumentServices",
-            "AWS Textract",
-            "AWS",
-            Arrays.asList("PDF", "TIFF", "PNG"),
-            Arrays.asList("Text", "JSON", "CSV"),
-            Arrays.asList("OCR", "Forms", "Tables"),
-            awsTextractLimits
-        );
-        serviceList.add(awsTextract);
-
-        ServiceLimits googleDocumentAILimits = new ServiceLimits(1, "GB");
-        CloudService googleDocumentAI = CloudServiceFactory.createService(
-            "DocumentServices",
-            "Google Document AI",
-            "GCP",
-            Arrays.asList("PDF", "TIFF", "GIF"),
-            Arrays.asList("JSON", "CSV"),
-            Arrays.asList("OCR", "Forms", "Parsing"),
-            googleDocumentAILimits
-        );
-        serviceList.add(googleDocumentAI);
+                serviceList.add(cloudService);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("Failed to read or parse the JSON file.");
+        }
 
         return serviceList;
     }

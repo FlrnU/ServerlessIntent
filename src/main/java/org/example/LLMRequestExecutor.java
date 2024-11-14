@@ -16,10 +16,8 @@ import java.util.regex.Pattern;
 import org.example.model.CloudService;
 import org.example.model.Intent;
 
-public class ChatGPTExecutor {
+public class LLMRequestExecutor {
 
-    private final String apiKey;
-    private final OpenAiService openAiService;
     private final List<ChatMessage> messages;
     private final int maxIterations;
     private final List<CloudService> pipeline;
@@ -29,14 +27,13 @@ public class ChatGPTExecutor {
     private String outputLanguage;
     private String bucketName;
     private String inputFilePath;
-    private byte[] inputFileContent;
     private String inputFileTextContent;
     private long inputFileSize;
+    private final LLMService llmService;
 
-    public ChatGPTExecutor(String apiKey, Intent intent,
-                           List<CloudService> pipeline) {
-        this.apiKey = apiKey;
-        this.openAiService = new OpenAiService(apiKey, Duration.ofSeconds(50));
+    public LLMRequestExecutor(LLMService llmService, Intent intent,
+                              List<CloudService> pipeline) {
+        this.llmService = llmService;
         this.messages = new ArrayList<>();
         this.maxIterations = 10;
         this.pipeline = pipeline;
@@ -61,7 +58,7 @@ public class ChatGPTExecutor {
             }
 
             Path path = Path.of(inputFilePath);
-            inputFileContent = Files.readAllBytes(path);
+            byte[] inputFileContent = Files.readAllBytes(path);
             inputFileSize = Files.size(path);
 
             // Try to read as text if it's a text-based format
@@ -237,9 +234,10 @@ public class ChatGPTExecutor {
             "- If you need bucket use the following: %s\n" +
             "- Implement proper error handling for each service\n" +
             "- Validate input/output at each step\n" +
-            "Please generate code that follows this service pipeline and handles all limitations.\n" +
+            "Please generate code that follows this service pipeline, handles all limitations and annotate it correctly with ```python\n" +
             "If the limits are surpassed by the input you need to try to split the input before calling the service and merge it afterwards" +
-            "The merging together after splitting is very important and should also be done on audio outputs!",
+            "The merging together after splitting is very important and should also be done on audio outputs!\n" +
+            "If possible save the output locally",
             inputType, inputLanguage,
             outputType, outputLanguage,
             fileInfo,
@@ -255,7 +253,7 @@ public class ChatGPTExecutor {
             System.out.printf("Iteration %d: Sending prompt to ChatGPT...%n",
                               i + 1);
 
-            String responseText = callChatGPTApi();
+            String responseText = callLLMService();
             System.out.printf("Received response:\n%s\n-------\n",
                               responseText);
 
@@ -273,8 +271,7 @@ public class ChatGPTExecutor {
             // Execute Python code
             ExecutionResult result = executePythonCode(pythonCode);
 
-            if (result.hasError() || result.output.contains("error") ||
-                result.output.contains("Error")) {
+            if (result.hasError()) {
                 System.out.printf("Error during execution: %s%n",
                                   result.getError());
                 messages.add(new ChatMessage(ChatMessageRole.USER.value(),
@@ -283,14 +280,30 @@ public class ChatGPTExecutor {
                                                  "Please fix the code while ensuring you:\n" +
                                                  "1. Follow the exact service pipeline\n" +
                                                  "2. Respect all service limitations\n" +
-                                                 "3. Handle the specific error encountered\n\n" +
+                                                 "3. Handle the specific error encountered\n" +
+                                                 "4. Always annotate code as ```python otherwise my application cannot read it out\n\n" +
                                                  "Service Pipeline Reference:\n%s",
                                                  result.getError(),
+                                                 pipelineInfo)));
+            } else if (result.output.contains("error") ||
+                       result.output.contains("Error")) {
+                System.out.printf("Error during execution: %s%n",
+                                  result.getOutput());
+                messages.add(new ChatMessage(ChatMessageRole.USER.value(),
+                                             String.format(
+                                                 "Error during execution: %s\n\n" +
+                                                 "Please fix the code while ensuring you:\n" +
+                                                 "1. Follow the exact service pipeline\n" +
+                                                 "2. Respect all service limitations\n" +
+                                                 "3. Handle the specific error encountered\n\n" +
+                                                 "Service Pipeline Reference:\n%s",
+                                                 result.getOutput(),
                                                  pipelineInfo)));
             } else {
                 System.out.printf("Execution result: %s\n-------\n",
                                   result.getOutput());
                 System.out.println("Python code executed successfully.");
+                System.out.println("Number of needed iterations: " + (i + 1));
                 messages.add(new ChatMessage(ChatMessageRole.USER.value(),
                                              "The code executed successfully. The result was: " +
                                              result.getOutput()));
@@ -299,16 +312,8 @@ public class ChatGPTExecutor {
         }
     }
 
-    private String callChatGPTApi() {
-        ChatCompletionRequest completionRequest =
-            ChatCompletionRequest.builder()
-                                 .model("gpt-4o")
-                                 .messages(messages)
-                                 .maxTokens(5000)
-                                 .build();
-
-        return openAiService.createChatCompletion(completionRequest)
-                            .getChoices().get(0).getMessage().getContent();
+    private String callLLMService() {
+        return llmService.sendMessages(messages);
     }
 
     private void extractAndExecuteShellOrBashCode(String responseText) {

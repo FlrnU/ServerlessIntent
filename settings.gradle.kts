@@ -1,2 +1,2 @@
-rootProject.name = "Ontology"
+rootProject.name = "ServerlessIntent"
 

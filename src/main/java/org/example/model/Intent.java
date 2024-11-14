@@ -8,6 +8,8 @@ public class Intent {
     private String outputLanguage;
     private String inputFilePath;
     private String bucketName;
+    private String serviceFilePath;
+    private String llmProvider;
 
     public String getInputType() {
         return inputType;
@@ -57,6 +59,22 @@ public class Intent {
         this.bucketName = bucketName;
     }
 
+    public String getServiceFilePath() {
+        return serviceFilePath;
+    }
+
+    public void setServiceFilePath(String serviceFilePath) {
+        this.serviceFilePath = serviceFilePath;
+    }
+
+    public String getLlmProvider() {
+        return llmProvider;
+    }
+
+    public void setLlmProvider(String llmProvider) {
+        this.llmProvider = llmProvider;
+    }
+
     @Override
     public String toString() {
         return "Intent{" +
@@ -66,6 +84,9 @@ public class Intent {
                ", outputLanguage='" + outputLanguage + '\'' +
                ", inputFilePath='" + inputFilePath + '\'' +
                ", bucketName='" + bucketName + '\'' +
+               ", serviceFilePath='" + serviceFilePath + '\'' +
+               ", llmProvider='" + llmProvider + '\'' +
                '}';
     }
+
 }

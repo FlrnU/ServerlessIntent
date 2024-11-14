@@ -1,0 +1,214 @@
+[
+    {
+        "category": "TextServices",
+        "name": "Google Cloud Translate",
+        "provider": "GCP",
+        "inputFormats": [
+            "Text",
+            "HTML"
+        ],
+        "outputFormats": [
+            "Text",
+            "HTML"
+        ],
+        "capabilities": [
+            "Translation"
+        ],
+        "limits": {
+            "value": 30000,
+            "unit": "characters"
+        }
+    },
+    {
+        "category": "TextServices",
+        "name": "AWS Translate",
+        "provider": "AWS",
+        "inputFormats": [
+            "Text",
+            "HTML"
+        ],
+        "outputFormats": [
+            "Text",
+            "HTML"
+        ],
+        "capabilities": [
+            "Translation"
+        ],
+        "limits": {
+            "value": 10,
+            "unit": "KB"
+        }
+    },
+    {
+        "category": "SpeechServices",
+        "name": "Google Cloud Text-to-Speech",
+        "provider": "GCP",
+        "inputFormats": [
+            "Text"
+        ],
+        "outputFormats": [
+            "MP3",
+            "WAV",
+            "OGG"
+        ],
+        "capabilities": [
+            "T2S"
+        ],
+        "limits": {
+            "value": 5000,
+            "unit": "characters"
+        }
+    },
+    {
+        "category": "SpeechServices",
+        "name": "AWS Polly",
+        "provider": "AWS",
+        "inputFormats": [
+            "Text",
+            "SSML"
+        ],
+        "outputFormats": [
+            "MP3",
+            "PCM"
+        ],
+        "capabilities": [
+            "T2S"
+        ],
+        "limits": {
+            "value": 3000,
+            "unit": "characters"
+        }
+    },
+    {
+        "category": "SpeechServices",
+        "name": "Google Cloud Speech-to-Text",
+        "provider": "GCP",
+        "inputFormats": [
+            "FLAC",
+            "WAV",
+            "MP3"
+        ],
+        "outputFormats": [
+            "Text"
+        ],
+        "capabilities": [
+            "S2T"
+        ],
+        "limits": {
+            "value": 480,
+            "unit": "minutes"
+        }
+    },
+    {
+        "category": "SpeechServices",
+        "name": "AWS Transcribe",
+        "provider": "AWS",
+        "inputFormats": [
+            "MP3",
+            "WAV",
+            "FLAC"
+        ],
+        "outputFormats": [
+            "Text",
+            "SRT",
+            "VTT"
+        ],
+        "capabilities": [
+            "S2T"
+        ],
+        "limits": {
+            "value": 4,
+            "unit": "hours"
+        }
+    },
+    {
+        "category": "VisionServices",
+        "name": "Google Cloud Vision",
+        "provider": "GCP",
+        "inputFormats": [
+            "JPG",
+            "PNG",
+            "GIF"
+        ],
+        "outputFormats": [
+            "Text",
+            "JSON"
+        ],
+        "capabilities": [
+            "Labels",
+            "Objects"
+        ],
+        "limits": {
+            "value": 20,
+            "unit": "MB"
+        }
+    },
+    {
+        "category": "VisionServices",
+        "name": "AWS Rekognition",
+        "provider": "AWS",
+        "inputFormats": [
+            "JPG",
+            "PNG",
+            "MP4"
+        ],
+        "outputFormats": [
+            "JSON"
+        ],
+        "capabilities": [
+            "Face",
+            "Labels"
+        ],
+        "limits": {
+            "value": 5,
+            "unit": "MB"
+        }
+    },
+    {
+        "category": "DocumentServices",
+        "name": "AWS Textract",
+        "provider": "AWS",
+        "inputFormats": [
+            "PDF",
+            "TIFF",
+            "PNG"
+        ],
+        "outputFormats": [
+            "Text",
+            "JSON",
+            "CSV"
+        ],
+        "capabilities": [
+            "OCR",
+            "Forms",
+            "Tables"
+        ],
+        "limits": {
+            "value": 500,
+            "unit": "MB"
+        }
+    },
+    {
+        "category": "DocumentServices",
+        "name": "Google Document AI",
+        "provider": "GCP",
+        "inputFormats": [
+            "PDF",
+            "TIFF",
+            "GIF"
+        ],
+        "outputFormats": [
+            "JSON",
+            "CSV"
+        ],
+        "capabilities": [
+            "OCR",
+            "Forms",
+            "Parsing"
+        ],
+        "limits": {
+            "value": 1,
+            "unit": "GB"
+        }
+    }
+]
