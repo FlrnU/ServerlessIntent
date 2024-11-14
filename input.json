@@ -1,10 +1,10 @@
 {
-  "inputType": "pdf",
-  "inputLanguage": "English",
-  "outputType": "mp3",
-  "outputLanguage": "German",
-  "inputFilePath": "input.pdf",
+  "inputType": "text",
+  "inputLanguage": "German",
+  "outputType": "text",
+  "outputLanguage": "English",
+  "inputFilePath": "input.txt",
   "bucketName": "hello-12345",
   "serviceFilePath": "services.json",
-  "llmProvider": "llama3.2"
+  "llmProvider": "mistral"
 }

@@ -1,11 +1,15 @@
 package org.example;
 
-import static org.example.OrchestratorModule.findPipeline;
+import static org.example.config.OrchestratorModule.findPipeline;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import org.example.config.ServiceRegistry;
+import org.example.executor.LLMRequestExecutor;
+import org.example.llm.LLMService;
+import org.example.llm.LLMServiceFactory;
 import org.example.model.CloudService;
 import org.example.model.Intent;
 

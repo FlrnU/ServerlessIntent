@@ -1,4 +1,4 @@
-package org.example;
+package org.example.llm;
 
 import com.theokanning.openai.completion.chat.ChatCompletionRequest;
 import com.theokanning.openai.completion.chat.ChatMessage;

@@ -1,4 +1,4 @@
-package org.example;
+package org.example.llm;
 
 import software.amazon.awssdk.regions.Region;
 
@@ -23,7 +23,7 @@ public class LLMServiceFactory {
             case "mistral" -> new MistralLLMService(Region.EU_WEST_2.toString(),
                                                     "mistral.mistral-large-2402-v1:0");
             case "mistral2" -> new Mistral2LLMService(Region.US_WEST_2.toString(),
-                                                    "mistral.mistral-large-2407-v1:0");
+                                                      "mistral.mistral-large-2407-v1:0");
             default ->
                 throw new IllegalArgumentException("Unknown LLM service type");
         };

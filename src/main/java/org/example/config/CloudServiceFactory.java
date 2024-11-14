@@ -1,4 +1,4 @@
-package org.example;
+package org.example.config;
 
 import java.util.List;
 import org.example.model.CloudService;

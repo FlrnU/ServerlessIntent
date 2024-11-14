@@ -1,4 +1,4 @@
-package org.example;
+package org.example.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.model.CloudService;
@@ -17,11 +17,9 @@ public class ServiceRegistry {
         ObjectMapper objectMapper = new ObjectMapper();
 
         try {
-            // Read and parse JSON file into a List of Maps
             List<Map<String, Object>> services =
                 objectMapper.readValue(new File(filePath), List.class);
 
-            // Iterate over each service map and create CloudService objects
             for (Map<String, Object> serviceMap : services) {
                 String category = (String) serviceMap.get("category");
                 String name = (String) serviceMap.get("name");

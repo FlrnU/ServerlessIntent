@@ -1,16 +1,15 @@
-package org.example;
+package org.example.llm;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.theokanning.openai.completion.chat.ChatMessage;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Llama2LLMService extends AWSBedrockLLMService {
+public class LlamaLLMService extends AWSBedrockLLMService {
 
-    public Llama2LLMService(String region, String modelIdentifier) {
+    public LlamaLLMService(String region, String modelIdentifier) {
         super(region, modelIdentifier);
     }
 

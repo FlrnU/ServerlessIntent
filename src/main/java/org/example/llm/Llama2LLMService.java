@@ -1,14 +1,15 @@
-package org.example;
+package org.example.llm;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.theokanning.openai.completion.chat.ChatMessage;
 import java.util.List;
 import java.util.Map;
 
-public class MistralLLMService extends AWSBedrockLLMService {
+public class Llama2LLMService extends AWSBedrockLLMService {
 
-    public MistralLLMService(String region, String modelIdentifier) {
+    public Llama2LLMService(String region, String modelIdentifier) {
         super(region, modelIdentifier);
     }
 
@@ -17,25 +18,22 @@ public class MistralLLMService extends AWSBedrockLLMService {
         try {
             // Build the prompt with roles and message contents
             StringBuilder promptBuilder = new StringBuilder();
-            promptBuilder.append("<s>[INST] ");
             for (ChatMessage message : messages) {
                 String role =
                     message.getRole().equalsIgnoreCase("user") ? "User" :
                     "Assistant";
                 promptBuilder.append(role).append(": ")
-                             .append(message.getContent()).append(" ");
+                             .append(message.getContent()).append("\nAssistant: ");
             }
-            promptBuilder.append("[/INST]");
-
             String prompt = promptBuilder.toString().trim();
 
+            // Create the body structure with prompt and additional parameters
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonBody = objectMapper.writeValueAsString(Map.of(
                 "prompt", prompt,
-                "max_tokens", 5000,
+                "max_gen_len", 5000,
                 "temperature", 0.5,
-                "top_p", 0.9,
-                "top_k", 50
+                "top_p", 0.9
             ));
 
             return jsonBody;
@@ -48,15 +46,24 @@ public class MistralLLMService extends AWSBedrockLLMService {
 
     @Override
     protected String parseResponse(String responseBody) {
+        ObjectMapper objectMapper = new ObjectMapper();
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
             JsonNode rootNode = objectMapper.readTree(responseBody);
-            JsonNode textNode = rootNode.path("outputs").get(0).path("text");
 
-            return textNode.asText();
-        } catch (Exception e) {
+            String response = rootNode.path("generation").asText();
+            if (response == null || response.isEmpty()) {
+                System.out.println(
+                    "Warning: 'generation' field is empty or not found.");
+            } else {
+                return response;
+            }
+
+        } catch (JsonProcessingException e) {
             e.printStackTrace();
-            return null;
+            System.out.println(
+                "Error parsing response body JSON: " + e.getMessage());
         }
+
+        return responseBody;
     }
 }
