@@ -30,13 +30,10 @@ public class ServiceRegistry {
                     (List<String>) serviceMap.get("outputFormats");
                 List<String> capabilities =
                     (List<String>) serviceMap.get("capabilities");
-                Map<String, Object> limitsMap =
-                    (Map<String, Object>) serviceMap.get("limits");
+                Map<String, Map<String, Object>> limitsMap =
+                    (Map<String, Map<String, Object>>) serviceMap.get("limits");
 
-                int limitValue = (int) limitsMap.get("value");
-                String limitUnit = (String) limitsMap.get("unit");
-                ServiceLimits serviceLimits =
-                    new ServiceLimits(limitValue, limitUnit);
+                ServiceLimits serviceLimits = new ServiceLimits(limitsMap);
 
                 // Create CloudService object using a factory method or constructor
                 CloudService cloudService = CloudServiceFactory.createService(

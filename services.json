@@ -15,8 +15,10 @@
             "Translation"
         ],
         "limits": {
-            "value": 30000,
-            "unit": "characters"
+            "translate_text": {
+                "value": 30000,
+                "unit": "characters"
+            }
         }
     },
     {
@@ -35,8 +37,14 @@
             "Translation"
         ],
         "limits": {
-            "value": 10,
-            "unit": "KB"
+            "translate_text": {
+                "value": 10,
+                "unit": "KB"
+            },
+            "start_text_translation_job": {
+                "value": 10,
+                "unit": "MB"
+            }
         }
     },
     {
@@ -55,8 +63,10 @@
             "T2S"
         ],
         "limits": {
-            "value": 5000,
-            "unit": "characters"
+            "synthesize_speech": {
+                "value": 5000,
+                "unit": "characters"
+            }
         }
     },
     {
@@ -75,8 +85,14 @@
             "T2S"
         ],
         "limits": {
-            "value": 3000,
-            "unit": "characters"
+            "synthesize_speech": {
+                "value": 3000,
+                "unit": "characters"
+            },
+            "start_speech_synthesis_task": {
+                "value": 100000,
+                "unit": "characters"
+            }
         }
     },
     {
@@ -95,8 +111,10 @@
             "S2T"
         ],
         "limits": {
-            "value": 480,
-            "unit": "minutes"
+            "recognize": {
+                "value": 480,
+                "unit": "minutes"
+            }
         }
     },
     {
@@ -117,8 +135,14 @@
             "S2T"
         ],
         "limits": {
-            "value": 4,
-            "unit": "hours"
+            "start_stream_transcription": {
+                "value": 4,
+                "unit": "hours"
+            },
+            "start_transcription_job": {
+                "value": 8,
+                "unit": "hours"
+            }
         }
     },
     {
@@ -139,8 +163,10 @@
             "Objects"
         ],
         "limits": {
-            "value": 20,
-            "unit": "MB"
+            "annotate_image": {
+                "value": 20,
+                "unit": "MB"
+            }
         }
     },
     {
@@ -160,8 +186,14 @@
             "Labels"
         ],
         "limits": {
-            "value": 5,
-            "unit": "MB"
+            "detect_labels": {
+                "value": 5,
+                "unit": "MB"
+            },
+            "start_label_detection": {
+                "value": 500,
+                "unit": "MB"
+            }
         }
     },
     {
@@ -184,8 +216,14 @@
             "Tables"
         ],
         "limits": {
-            "value": 500,
-            "unit": "MB"
+            "analyze_document": {
+                "value": 5,
+                "unit": "MB"
+            },
+            "start_document_analysis": {
+                "value": 500,
+                "unit": "MB"
+            }
         }
     },
     {
@@ -207,8 +245,10 @@
             "Parsing"
         ],
         "limits": {
-            "value": 1,
-            "unit": "GB"
+            "process_document": {
+                "value": 1,
+                "unit": "GB"
+            }
         }
     }
 ]

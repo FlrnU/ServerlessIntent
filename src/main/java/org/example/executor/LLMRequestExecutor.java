@@ -7,6 +7,7 @@ import java.io.*;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.example.llm.LLMService;
@@ -235,14 +236,29 @@ public class LLMRequestExecutor {
 
             // Service-specific limitations
             if (service.getServiceLimits() != null &&
-                service.getServiceLimits().getLimit() != 0) {
+                service.getServiceLimits().getLimits() != null) {
                 description.append("   Limitations:\n");
 
-                description.append("    - ")
-                           .append(service.getServiceLimits().getLimit())
-                           .append(service.getServiceLimits().getUnit())
-                           .append("\n");
+                // Iterate over the limits map
+                for (Map.Entry<String, Map<String, Object>> entry : service.getServiceLimits()
+                                                                           .getLimits()
+                                                                           .entrySet()) {
+                    String functionName = entry.getKey();
+                    Map<String, Object> limitDetails = entry.getValue();
 
+                    // Extract value and unit from the limit details
+                    int limitValue = (int) limitDetails.get("value");
+                    String limitUnit = (String) limitDetails.get("unit");
+
+                    // Append to the description
+                    description.append("    - Function: ")
+                               .append(functionName)
+                               .append(" -> ")
+                               .append(limitValue)
+                               .append(" ")
+                               .append(limitUnit)
+                               .append("\n");
+                }
             }
 
             // Service-specific capabilities
@@ -295,6 +311,7 @@ public class LLMRequestExecutor {
             CodeExecutor.executeShellCode(shellCode);
         }
     }
+
     private String extractPythonCode(String responseText) {
         Pattern pattern = Pattern.compile("```python(.*?)```", Pattern.DOTALL);
         Matcher matcher = pattern.matcher(responseText);
