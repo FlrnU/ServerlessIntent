@@ -35,7 +35,6 @@ public class ServiceRegistry {
 
                 ServiceLimits serviceLimits = new ServiceLimits(limitsMap);
 
-                // Create CloudService object using a factory method or constructor
                 CloudService cloudService = CloudServiceFactory.createService(
                     category,
                     name,

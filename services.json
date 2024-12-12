@@ -1,28 +1,6 @@
 [
     {
         "category": "TextServices",
-        "name": "Google Cloud Translate",
-        "provider": "GCP",
-        "inputFormats": [
-            "Text",
-            "HTML"
-        ],
-        "outputFormats": [
-            "Text",
-            "HTML"
-        ],
-        "capabilities": [
-            "Translation"
-        ],
-        "limits": {
-            "translate_text": {
-                "value": 30000,
-                "unit": "characters"
-            }
-        }
-    },
-    {
-        "category": "TextServices",
         "name": "AWS Translate",
         "provider": "AWS",
         "inputFormats": [
@@ -44,28 +22,6 @@
             "start_text_translation_job": {
                 "value": 10,
                 "unit": "MB"
-            }
-        }
-    },
-    {
-        "category": "SpeechServices",
-        "name": "Google Cloud Text-to-Speech",
-        "provider": "GCP",
-        "inputFormats": [
-            "Text"
-        ],
-        "outputFormats": [
-            "MP3",
-            "WAV",
-            "OGG"
-        ],
-        "capabilities": [
-            "T2S"
-        ],
-        "limits": {
-            "synthesize_speech": {
-                "value": 5000,
-                "unit": "characters"
             }
         }
     },
@@ -97,28 +53,6 @@
     },
     {
         "category": "SpeechServices",
-        "name": "Google Cloud Speech-to-Text",
-        "provider": "GCP",
-        "inputFormats": [
-            "FLAC",
-            "WAV",
-            "MP3"
-        ],
-        "outputFormats": [
-            "Text"
-        ],
-        "capabilities": [
-            "S2T"
-        ],
-        "limits": {
-            "recognize": {
-                "value": 480,
-                "unit": "minutes"
-            }
-        }
-    },
-    {
-        "category": "SpeechServices",
         "name": "AWS Transcribe",
         "provider": "AWS",
         "inputFormats": [
@@ -142,30 +76,6 @@
             "start_transcription_job": {
                 "value": 8,
                 "unit": "hours"
-            }
-        }
-    },
-    {
-        "category": "VisionServices",
-        "name": "Google Cloud Vision",
-        "provider": "GCP",
-        "inputFormats": [
-            "JPG",
-            "PNG",
-            "GIF"
-        ],
-        "outputFormats": [
-            "Text",
-            "JSON"
-        ],
-        "capabilities": [
-            "Labels",
-            "Objects"
-        ],
-        "limits": {
-            "annotate_image": {
-                "value": 20,
-                "unit": "MB"
             }
         }
     },
@@ -222,31 +132,6 @@
             "start_document_analysis": {
                 "value": 500,
                 "unit": "MB"
-            }
-        }
-    },
-    {
-        "category": "DocumentServices",
-        "name": "Google Document AI",
-        "provider": "GCP",
-        "inputFormats": [
-            "PDF",
-            "TIFF",
-            "GIF"
-        ],
-        "outputFormats": [
-            "JSON",
-            "CSV"
-        ],
-        "capabilities": [
-            "OCR",
-            "Forms",
-            "Parsing"
-        ],
-        "limits": {
-            "process_document": {
-                "value": 1,
-                "unit": "GB"
             }
         }
     },

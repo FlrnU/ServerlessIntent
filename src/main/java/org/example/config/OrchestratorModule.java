@@ -49,9 +49,6 @@ public class OrchestratorModule {
 
     public static List<CloudService> findPipeline(List<CloudService> services,
                                                   Intent intent) {
-        services = services.stream()
-                           .filter(service -> "AWS".equals(service.getProvider()))
-                           .toList();
 
         Queue<ServiceNode> queue = new LinkedList<>();
         Set<String> visited = new HashSet<>();

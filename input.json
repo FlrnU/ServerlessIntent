@@ -1,10 +1,10 @@
 {
-  "inputType": "mp4",
+  "inputType": "mp3",
   "inputLanguage": "english",
   "outputType": "mp3",
-  "outputLanguage": "english",
-  "inputFilePath": "input.mp4",
+  "outputLanguage": "german",
+  "inputFilePath": "input.mp3",
   "bucketName": "hello-12345",
   "serviceFilePath": "services.json",
-  "llmProvider": "llama"
+  "llmProvider": "mistral2"
 }

@@ -7,7 +7,6 @@ import java.io.*;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.example.llm.LLMService;
@@ -189,6 +188,7 @@ public class LLMRequestExecutor {
 
             ExecutionResult result = CodeExecutor.executePythonCode(pythonCode);
 
+            System.out.println("Output being checked: " + result.getOutput());
             if (result.hasError()) {
                 System.out.printf("Error during execution: %s%n",
                                   result.getError());

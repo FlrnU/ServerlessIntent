@@ -43,7 +43,6 @@ public class FileUtils {
         description.append("- File path: ").append(inputFilePath).append("\n");
 
         if (inputFileTextContent != null) {
-            // For text files, include a preview
             String preview = inputFileTextContent.length() > 1000
                              ? inputFileTextContent.substring(0, 1000) +
                                "... (truncated)"
@@ -51,7 +50,6 @@ public class FileUtils {
             description.append("- Content preview:\n").append(preview)
                        .append("\n");
         } else {
-            // For binary files, include metadata and handling instructions
             description.append("- Binary file detected\n");
             if (inputType.toLowerCase().contains("pdf")) {
                 description.append(
