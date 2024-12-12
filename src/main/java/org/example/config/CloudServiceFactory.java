@@ -3,6 +3,7 @@ package org.example.config;
 import java.util.List;
 import org.example.model.CloudService;
 import org.example.model.DocumentService;
+import org.example.model.MediaService;
 import org.example.model.ServiceLimits;
 import org.example.model.SpeechService;
 import org.example.model.TextService;
@@ -30,6 +31,9 @@ public class CloudServiceFactory {
                 return new DocumentService(name, provider, inputFormat,
                                            outputFormat, features,
                                            serviceLimits);
+            case "MediaServices":
+                return new MediaService(name, provider, inputFormat,
+                                        outputFormat, features, serviceLimits);
             default:
                 throw new IllegalArgumentException(
                     "Unbekannter Service-Typ: " + type);

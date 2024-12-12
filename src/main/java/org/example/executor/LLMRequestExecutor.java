@@ -24,6 +24,53 @@ public class LLMRequestExecutor {
         You should adhere to the specified services pipeline, their order, and their limitations.
         Ensure each service's input/output requirements are met and properly handled in the code.
         """;
+    private static final String VIDEO_CONVERSION_JOB_SETTINGS = """
+                                                                {
+                                                                    "Inputs": [
+                                                                        {
+                                                                            "AudioSelectors": {
+                                                                                "Audio Selector 1": {
+                                                                                    "DefaultSelection": "DEFAULT"
+                                                                                }
+                                                                            },
+                                                                            "TimecodeSource": "ZEROBASED",
+                                                                            "FileInput": f"s3://{s3_bucket}/{input_filename}"
+                                                                        }
+                                                                    ],
+                                                                    "OutputGroups": [
+                                                                        {
+                                                                            "Name": "File Group",
+                                                                            "Outputs": [
+                                                                                {
+                                                                                    "ContainerSettings": {
+                                                                                        "Container": "RAW"
+                                                                                    },
+                                                                                    "AudioDescriptions": [
+                                                                                        {
+                                                                                            "AudioSourceName": "Audio Selector 1",
+                                                                                            "CodecSettings": {
+                                                                                                "Codec": "MP3",
+                                                                                                "Mp3Settings": {
+                                                                                                    "Bitrate": 96000,
+                                                                                                    "SampleRate": 48000,
+                                                                                                    "RateControlMode": "CBR",
+                                                                                                    "Channels": 2
+                                                                                                }
+                                                                                            }
+                                                                                        }
+                                                                                    ]
+                                                                                }
+                                                                            ],
+                                                                            "OutputGroupSettings": {
+                                                                                "Type": "FILE_GROUP_SETTINGS",
+                                                                                "FileGroupSettings": {
+                                                                                    "Destination": f"s3://{s3_bucket}/{output_filename_without_file_extension}"
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    ]
+                                                                }
+                                                                """;
 
 
     private final List<ChatMessage> messages;
@@ -101,10 +148,14 @@ public class LLMRequestExecutor {
                                              Additional Requirements:
                                              - AWS credentials are already configured
                                              - If you need a bucket, use the following: %s
+                                             - If you need a role use the following: mediaconvert_trust
+                                             - The account id is the following: 717556240325
                                              - Implement proper error handling for each service
                                              - Validate input/output at each step
                                              Please generate code that follows this service pipeline, handles all limitations, and annotate it correctly with ```python.
-                                             If the limits are surpassed by the input, you need to try to split the input before calling the service and merge it afterward.
+                                             You need to work autonomously and I cannot exchange parts of the code.
+                                             If the limits are surpassed by the input, you need to try to split the input before calling the service and merge it afterwards, 
+                                             But only do the split if needed, first try it without splitting it.
                                              Merging together after splitting is very important and should also be done on audio outputs!
                                              If possible, save the output locally.
                                              """,
@@ -150,13 +201,16 @@ public class LLMRequestExecutor {
                                                            2. Respect all service limitations
                                                            3. Handle the specific error encountered
                                                            4. Always annotate code as ```python
+                                                           5. I cannot exchange parts of the code
                                                            
                                                            Service Pipeline Reference:
                                                            %s
                                                            """,
                                                            result.getError(),
                                                            pipelineInfo)));
-            } else if (result.getOutput().toLowerCase().contains("error")) {
+            } else if (result.getOutput().toLowerCase().contains("error") ||
+                       result.getOutput().toLowerCase().contains("failed") ||
+                       result.getOutput().toLowerCase().contains("fail")) {
                 System.out.printf("Error during execution: %s%n",
                                   result.getOutput());
                 messages.add(new ChatMessage(ChatMessageRole.USER.value(),
@@ -205,8 +259,9 @@ public class LLMRequestExecutor {
             The transformation must use the following AWS services in this exact order.
             Each service has specific capabilities and limitations that must be respected:
             
-            
             """);
+
+        boolean videoConversionNeeded = false;
 
         for (int i = 0; i < pipeline.size(); i++) {
             CloudService service = pipeline.get(i);
@@ -234,49 +289,18 @@ public class LLMRequestExecutor {
             }
             description.append("\n");
 
-            // Service-specific limitations
-            if (service.getServiceLimits() != null &&
-                service.getServiceLimits().getLimits() != null) {
-                description.append("   Limitations:\n");
-
-                // Iterate over the limits map
-                for (Map.Entry<String, Map<String, Object>> entry : service.getServiceLimits()
-                                                                           .getLimits()
-                                                                           .entrySet()) {
-                    String functionName = entry.getKey();
-                    Map<String, Object> limitDetails = entry.getValue();
-
-                    // Extract value and unit from the limit details
-                    int limitValue = (int) limitDetails.get("value");
-                    String limitUnit = (String) limitDetails.get("unit");
-
-                    // Append to the description
-                    description.append("    - Function: ")
-                               .append(functionName)
-                               .append(" -> ")
-                               .append(limitValue)
-                               .append(" ")
-                               .append(limitUnit)
-                               .append("\n");
-                }
+            // Detect video conversion requirement
+            if (service.getName().toLowerCase().contains("mediaconvert") &&
+                (service.getInputFormat().contains("MP4") ||
+                 service.getOutputFormat().contains("MP3"))) {
+                videoConversionNeeded = true;
             }
 
-            // Service-specific capabilities
-            if (service.getFeatures() != null &&
-                !service.getFeatures().isEmpty()) {
-                description.append("   Capabilities:\n");
-                for (String capability : service.getFeatures()) {
-                    description.append("    - ").append(capability)
-                               .append("\n");
-                }
-            }
-
-            // Add connection information to next service if not the last service
+            // Add connection information to the next service if not the last service
             if (i < pipeline.size() - 1) {
                 CloudService nextService = pipeline.get(i + 1);
                 description.append("   Must connect to: ")
                            .append(nextService.getName());
-
             }
 
             description.append("\n");
@@ -288,10 +312,17 @@ public class LLMRequestExecutor {
         description.append("2. Final output: ").append(outputType)
                    .append(" in ").append(outputLanguage).append("\n");
         description.append(
-            "3. Each service must properly handle the output of the previous service " +
-            "and prepare input for the next service\n");
+                       "3. Each service must properly handle the output of the previous service ")
+                   .append("and prepare input for the next service\n");
         description.append(
             "4. Implement proper error handling and validation between service transitions\n");
+
+        // Append job settings if video conversion is needed
+        if (videoConversionNeeded) {
+            description.append("\nVideo Conversion Example Job Settings:\n")
+                       .append(VIDEO_CONVERSION_JOB_SETTINGS)
+                       .append("\n");
+        }
 
         return description.toString();
     }

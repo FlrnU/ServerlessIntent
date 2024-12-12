@@ -175,8 +175,7 @@
         "provider": "AWS",
         "inputFormats": [
             "JPG",
-            "PNG",
-            "MP4"
+            "PNG"
         ],
         "outputFormats": [
             "JSON"
@@ -247,6 +246,32 @@
         "limits": {
             "process_document": {
                 "value": 1,
+                "unit": "GB"
+            }
+        }
+    },
+    {
+        "category": "MediaServices",
+        "name": "AWS Elemental MediaConvert",
+        "provider": "AWS",
+        "inputFormats": [
+            "MP4",
+            "MKV",
+            "MOV",
+            "AVI"
+        ],
+        "outputFormats": [
+            "MP3",
+            "AAC",
+            "MP4"
+        ],
+        "capabilities": [
+            "Transcoding",
+            "AudioExtraction"
+        ],
+        "limits": {
+            "transcoding_job": {
+                "value": 10,
                 "unit": "GB"
             }
         }

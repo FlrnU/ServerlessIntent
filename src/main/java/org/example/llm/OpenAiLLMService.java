@@ -11,14 +11,14 @@ public class OpenAiLLMService implements LLMService {
     private final OpenAiService openAiService;
 
     public OpenAiLLMService(String apiKey) {
-        this.openAiService = new OpenAiService(apiKey, Duration.ofSeconds(50));
+        this.openAiService = new OpenAiService(apiKey, Duration.ofSeconds(300));
     }
 
     @Override
     public String sendMessages(List<ChatMessage> messages) {
         ChatCompletionRequest completionRequest =
             ChatCompletionRequest.builder()
-                                 .model("gpt-4")
+                                 .model("gpt-4o")
                                  .messages(messages)
                                  .maxTokens(5000)
                                  .build();
