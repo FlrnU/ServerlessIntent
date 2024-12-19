@@ -32,8 +32,8 @@ public class LlamaLLMService extends AWSBedrockLLMService {
             String jsonBody = objectMapper.writeValueAsString(Map.of(
                 "prompt", prompt,
                 "max_gen_len", 5000,
-                "temperature", 1,
-                "top_p", 0.999
+                "temperature", 0.0,
+                "top_p", 0.9
             ));
 
             return jsonBody;

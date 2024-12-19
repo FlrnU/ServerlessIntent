@@ -62,14 +62,12 @@ public class OrchestratorModule {
                 return currentNode.currentPipeline;
             }
 
-            // First try to find matching services from the same provider
             List<CloudService> sameProviderServices =
                 findMatchingServicesFromProvider(
                     services,
                     currentNode.currentProvider
                 );
 
-            // If no matching services from same provider, use all services
             List<CloudService> servicesToTry = !sameProviderServices.isEmpty()
                                                ? sameProviderServices
                                                : services;

@@ -21,6 +21,8 @@ public class OpenAiLLMService implements LLMService {
                                  .model("gpt-4o")
                                  .messages(messages)
                                  .maxTokens(5000)
+                                 .temperature(1.0)
+                                 .topP(0.9)
                                  .build();
 
         return openAiService.createChatCompletion(completionRequest)

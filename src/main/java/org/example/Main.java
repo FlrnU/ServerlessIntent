@@ -12,6 +12,11 @@ import org.example.llm.LLMService;
 import org.example.llm.LLMServiceFactory;
 import org.example.model.CloudService;
 import org.example.model.Intent;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 public class Main {
 
@@ -52,5 +57,42 @@ public class Main {
         LLMRequestExecutor executor =
             new LLMRequestExecutor(llmService, intent, pipeline);
         executor.process();
+
+        deleteBucketContents(intent.getBucketName());
+    }
+    private static void deleteBucketContents(String bucketName) {
+        // Initialize the S3 client
+        S3Client s3Client = S3Client.create();
+
+        try {
+            // List objects in the bucket
+            ListObjectsV2Request listObjectsRequest =
+                ListObjectsV2Request.builder()
+                                    .bucket(bucketName)
+                                    .build();
+
+            ListObjectsV2Response listObjectsResponse =
+                s3Client.listObjectsV2(listObjectsRequest);
+
+            // Iterate through and delete each object
+            for (S3Object s3Object : listObjectsResponse.contents()) {
+                String key = s3Object.key();
+                System.out.println("Deleting object: " + key);
+
+                DeleteObjectRequest deleteObjectRequest =
+                    DeleteObjectRequest.builder()
+                                       .bucket(bucketName)
+                                       .key(key)
+                                       .build();
+
+                s3Client.deleteObject(deleteObjectRequest);
+            }
+
+            System.out.println("All contents in the bucket '" + bucketName + "' have been deleted.");
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            s3Client.close();
+        }
     }
 }
