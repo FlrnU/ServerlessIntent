@@ -69,6 +69,7 @@ public class LLMRequestExecutor {
                                                                         }
                                                                     ]
                                                                 }
+                                                                It is very important for the output filename to not include the file ending .mp3 as it is automatically attached.
                                                                 """;
 
 
@@ -147,10 +148,12 @@ public class LLMRequestExecutor {
                                              Additional Requirements:
                                              - AWS credentials are already configured
                                              - If you need a bucket, use the following: %s
+                                             - As default region please use: us-east-1
                                              - If you need a role use the following: mediaconvert_trust
                                              - The account id is the following: 717556240325
                                              - Implement proper error handling for each service
                                              - Validate input/output at each step
+                                             - For transcription I only want the text as a result not the whole transcription json content
                                              Please generate code that follows this service pipeline, handles all limitations, and annotate it correctly with ```python.
                                              You need to work autonomously and I cannot exchange parts of the code.
                                              If the limits are surpassed by the input, you need to try to split the input before calling the service and merge it afterwards, 

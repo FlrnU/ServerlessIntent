@@ -1,3 +1,7 @@
+import org.gradle.BuildAdapter
+import org.gradle.BuildResult
+import java.util.concurrent.TimeUnit
+
 plugins {
     id("java")
     application
@@ -9,7 +13,8 @@ version = "1.0-SNAPSHOT"
 repositories {
     mavenCentral()
 }
-application{
+
+application {
     mainClass.set("org.example.Main")
 }
 
@@ -28,3 +33,14 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+var startTime = System.currentTimeMillis()
+
+gradle.addBuildListener(object : BuildAdapter() {
+    override fun buildFinished(result: BuildResult) {
+        val duration = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime)
+        println("\n${duration}s")
+    }
+})
+
+

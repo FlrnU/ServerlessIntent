@@ -17,12 +17,7 @@ public class LLMServiceFactory {
                                                   "us.anthropic.claude-3-5-sonnet-20241022-v2:0");
             case "llama" -> new LlamaLLMService(Region.US_EAST_1.toString(),
                                                 "us.meta.llama3-1-70b-instruct-v1:0");
-            case "llama3.2" ->
-                new Llama2LLMService(Region.EU_CENTRAL_1.toString(),
-                                     "eu.meta.llama3-2-3b-instruct-v1:0");
-            case "mistral" -> new MistralLLMService(Region.EU_WEST_2.toString(),
-                                                    "mistral.mistral-large-2402-v1:0");
-            case "mistral2" -> new Mistral2LLMService(Region.US_WEST_2.toString(),
+            case "mistral" -> new Mistral2LLMService(Region.US_WEST_2.toString(),
                                                       "mistral.mistral-large-2407-v1:0");
             default ->
                 throw new IllegalArgumentException("Unknown LLM service type");
