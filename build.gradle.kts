@@ -26,6 +26,7 @@ dependencies {
     implementation("software.amazon.awssdk:sdk-core:2.29.10")
     implementation("software.amazon.awssdk:apache-client:2.29.10")
     implementation("software.amazon.awssdk:s3:2.29.10")
+    implementation("io.github.cdimascio:java-dotenv:5.2.2")
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 }

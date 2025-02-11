@@ -3,6 +3,7 @@ package org.example;
 import static org.example.config.OrchestratorModule.findPipeline;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.cdimascio.dotenv.Dotenv;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -21,6 +22,7 @@ import software.amazon.awssdk.services.s3.model.S3Object;
 public class Main {
 
     public static void main(String[] args) {
+        String openAiApiKey = "";
         ObjectMapper objectMapper = new ObjectMapper();
         String filePath = "./input.json";
         Intent intent = null;
@@ -32,6 +34,10 @@ public class Main {
             System.out.println(intent.toString());
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        if (intent != null && intent.getLlmProvider().toLowerCase().equals("openai")){
+            Dotenv dotenv = Dotenv.load();
+            openAiApiKey = dotenv.get("API_KEY");
         }
 
         List<CloudService> services =
@@ -50,10 +56,9 @@ public class Main {
             }
         }
 
-        String apiKey =
-            "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";
+
         LLMService llmService =
-            LLMServiceFactory.getLLMService(intent.getLlmProvider(), apiKey);
+            LLMServiceFactory.getLLMService(intent.getLlmProvider(), openAiApiKey);
         LLMRequestExecutor executor =
             new LLMRequestExecutor(llmService, intent, pipeline);
         executor.process();
