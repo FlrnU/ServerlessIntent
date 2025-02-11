@@ -1,35 +1,26 @@
 package org.example.model;
 
+import java.util.Map;
+
 public class ServiceLimits {
-    private int limit;
-    private String unit;
+    private Map<String, Map<String, Object>> limits; // Map of function name to limit details
 
-    public ServiceLimits(int limit, String unit) {
-        this.limit = limit;
-        this.unit = unit;
+    public ServiceLimits(Map<String, Map<String, Object>> limits) {
+        this.limits = limits;
     }
 
-    public int getLimit() {
-        return limit;
+    public Map<String, Map<String, Object>> getLimits() {
+        return limits;
     }
 
-    public void setLimit(int limit) {
-        this.limit = limit;
-    }
-
-    public String getUnit() {
-        return unit;
-    }
-
-    public void setUnit(String unit) {
-        this.unit = unit;
+    public void setLimits(Map<String, Map<String, Object>> limits) {
+        this.limits = limits;
     }
 
     @Override
     public String toString() {
         return "ServiceLimits{" +
-               "limit=" + limit +
-               ", unit='" + unit + '\'' +
+               "limits=" + limits +
                '}';
     }
 }

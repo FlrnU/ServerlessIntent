@@ -9,10 +9,15 @@ build/
 .idea/jarRepositories.xml
 .idea/compiler.xml
 .idea/libraries/
+.idea/sonarlint/
+.idea/sonarlint.xml
+.idea/misc.xml
+.idea/uiDesigner.xml
 *.iws
 *.iml
 *.ipr
 out/
+.env
 !**/src/main/**/out/
 !**/src/test/**/out/
 

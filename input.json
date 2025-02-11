@@ -1,8 +1,10 @@
 {
-  "inputType": "text",
-  "inputLanguage": "German",
+  "inputType": "pdf",
+  "inputLanguage": "english",
   "outputType": "mp3",
-  "outputLanguage": "Spanish",
-  "inputFilePath": "input.txt",
-  "bucketName": "hello-12345"
+  "outputLanguage": "english",
+  "inputFilePath": "input.pdf",
+  "bucketName": "hello-12345",
+  "serviceFilePath": "services.json",
+  "llmProvider": "llama"
 }
