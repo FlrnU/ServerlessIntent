@@ -4,7 +4,7 @@
   "outputType": "mp3",
   "outputLanguage": "english",
   "inputFilePath": "input.pdf",
-  "bucketName": "hello-12345",
+  "bucketName": "<your-bucket-name>",
   "serviceFilePath": "services.json",
-  "llmProvider": "llama"
+  "llmProvider": "claude"
 }
