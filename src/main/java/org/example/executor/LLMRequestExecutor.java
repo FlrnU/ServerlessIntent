@@ -2,20 +2,22 @@ package org.example.executor;
 
 import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.completion.chat.ChatMessageRole;
-
-import java.io.*;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.example.llm.LLMService;
 import org.example.model.CloudService;
 import org.example.model.Intent;
 import org.example.utlis.FileUtils;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class LLMRequestExecutor {
 
+    private static final Dotenv DOTENV = Dotenv.load();
     private static final int MAX_ITERATIONS = 10;
     private static final String SYSTEM_PROMPT =
         """
@@ -72,6 +74,56 @@ public class LLMRequestExecutor {
                                                                 It is very important for the output filename to not include the file ending .mp3 as it is automatically attached.
                                                                 """;
 
+    private static final String AWS_QUERY_TEMPLATE = """
+            Generate executable Python code for the following transformation task:
+            \s
+            Source Format: %s in %s
+            Target Format: %s in %s
+            \s
+            %s
+            Detailed Service Pipeline Configuration:
+            %s
+            Additional Requirements:
+            - AWS credentials are already configured
+            - If you need a bucket, use the following: %s
+            - As default region please use: us-east-1
+            - The account id is the following: %s
+            - If you need a role use the following: %s
+            - Implement proper error handling for each service
+            - Validate input/output at each step
+            - For transcription I only want the text as a result not the whole transcription json content
+            Please generate code that follows this service pipeline, handles all limitations, and annotate it correctly with ```python.
+            You need to work autonomously and I cannot exchange parts of the code.
+            If the limits are surpassed by the input, you need to try to split the input before calling the service and merge it afterwards,\s
+            But only do the split if needed, first try it without splitting it.
+            Merging together after splitting is very important and should also be done on audio outputs!
+            If possible, save the output locally.
+            """;
+
+    private static final String GCP_QUERY_TEMPLATE = """
+            Generate executable Python code for the following transformation task:
+            
+            Source Format: %s in %s
+            Target Format: %s in %s
+            
+            %s
+            Detailed Service Pipeline Configuration:
+            %s
+            Additional Requirements:
+            - GCP credentials are already configured
+            - GCP service account credentials are given in the file "service-account.json"
+            - If you need a cloud storage, use the following: %s
+            - The GCP project id is the following: %s
+            - Implement proper error handling for each service
+            - Validate input/output at each step
+            - For transcription I only want the text as a result not the whole transcription json content
+            Please generate code that follows this service pipeline, handles all limitations, and annotate it correctly with ```python.
+            You need to work autonomously and I cannot exchange parts of the code.
+            If the limits are surpassed by the input, you need to try to split the input before calling the service and merge it afterwards, 
+            But only do the split if needed, first try it without splitting it.
+            Merging together after splitting is very important and should also be done on audio outputs!
+            If possible, save the output locally.
+            """;
 
     private final List<ChatMessage> messages;
     private final List<CloudService> pipeline;
@@ -84,18 +136,20 @@ public class LLMRequestExecutor {
     private String inputFileTextContent;
     private long inputFileSize;
     private final LLMService llmService;
+    private final String cloudProvider;
 
     public LLMRequestExecutor(LLMService llmService, Intent intent,
                               List<CloudService> pipeline) {
         this.llmService = llmService;
         this.messages = new ArrayList<>();
         this.pipeline = pipeline;
-        this.inputType = intent.getInputType();
-        this.inputLanguage = intent.getInputLanguage();
-        this.outputType = intent.getOutputType();
-        this.outputLanguage = intent.getOutputLanguage();
+        this.inputType = intent.getInputTypeWithoutUri();
+        this.inputLanguage = intent.getInputLanguageWithoutUri();
+        this.outputType = intent.getOutputTypeWithoutUri();
+        this.outputLanguage = intent.getOutputLanguageWithoutUri();
         this.bucketName = intent.getBucketName();
         this.inputFilePath = intent.getInputFilePath();
+        this.cloudProvider = intent.getCloudProvider();
 
         loadInputFile();
     }
@@ -136,36 +190,15 @@ public class LLMRequestExecutor {
                                               inputFilePath,
                                               inputFileTextContent);
 
-        String initialPrompt = String.format("""
-                                             Generate executable Python code for the following transformation task:
-                                             
-                                             Source Format: %s in %s
-                                             Target Format: %s in %s
-                                             
-                                             %s
-                                             Detailed Service Pipeline Configuration:
-                                             %s
-                                             Additional Requirements:
-                                             - AWS credentials are already configured
-                                             - If you need a bucket, use the following: %s
-                                             - As default region please use: us-east-1
-                                             - If you need a role use the following: mediaconvert_trust
-                                             - The account id is the following: 717556240325
-                                             - Implement proper error handling for each service
-                                             - Validate input/output at each step
-                                             - For transcription I only want the text as a result not the whole transcription json content
-                                             Please generate code that follows this service pipeline, handles all limitations, and annotate it correctly with ```python.
-                                             You need to work autonomously and I cannot exchange parts of the code.
-                                             If the limits are surpassed by the input, you need to try to split the input before calling the service and merge it afterwards, 
-                                             But only do the split if needed, first try it without splitting it.
-                                             Merging together after splitting is very important and should also be done on audio outputs!
-                                             If possible, save the output locally.
-                                             """,
-                                             inputType, inputLanguage,
-                                             outputType, outputLanguage,
-                                             fileInfo,
-                                             pipelineInfo,
-                                             bucketName);
+        String initialPrompt = String.format(
+                this.cloudProvider.equalsIgnoreCase("aws") ? AWS_QUERY_TEMPLATE : GCP_QUERY_TEMPLATE,
+                inputType, inputLanguage,
+                outputType, outputLanguage,
+                fileInfo,
+                pipelineInfo,
+                bucketName,
+                this.cloudProvider.equalsIgnoreCase("aws") ? DOTENV.get("AWS_ACCOUNT_ID") : DOTENV.get("GCP_PROJECT_ID"),
+                this.cloudProvider.equalsIgnoreCase("aws") ? DOTENV.get("AWS_ROLE") : "");
 
         System.out.println(initialPrompt);
 
@@ -254,15 +287,14 @@ public class LLMRequestExecutor {
 
     private String generateDetailedPipelineDescription() {
         if (pipeline == null || pipeline.isEmpty()) {
-            return "No specific AWS services are required.";
+            return String.format("No specific %s services are required.", cloudProvider.toUpperCase());
         }
 
-        StringBuilder description = new StringBuilder(
-            """
-            The transformation must use the following AWS services in this exact order.
-            Each service has specific capabilities and limitations that must be respected:
-            
-            """);
+        StringBuilder description = new StringBuilder();
+        description.append("The transformation must use the following ")
+                .append(cloudProvider.toUpperCase())
+                .append(" services in this exact order.")
+                .append("Each service has specific capabilities and limitations that must be respected:\n");
 
         boolean videoConversionNeeded = false;
 

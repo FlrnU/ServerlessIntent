@@ -1,0 +1,11 @@
+{
+  "inputType": "http://example.org/data-types#MP4",
+  "inputLanguage": "http://example.org/data-types#language=english",
+  "outputType": "http://example.org/data-types#Text",
+  "outputLanguage": "http://example.org/data-types#language=german",
+  "inputFilePath": "input.mp4",
+  "bucketName": "<your-bucket-name>",
+  "serviceFilePath": "services_gcp.jsonld",
+  "llmProvider": "claude",
+  "cloudProvider": "gcp"
+}

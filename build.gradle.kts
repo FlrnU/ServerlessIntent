@@ -27,6 +27,8 @@ dependencies {
     implementation("software.amazon.awssdk:apache-client:2.29.10")
     implementation("software.amazon.awssdk:s3:2.29.10")
     implementation("io.github.cdimascio:java-dotenv:5.2.2")
+    implementation("com.google.cloud:google-cloud-storage:2.53.1")
+    implementation("org.apache.jena:apache-jena-libs:5.4.0")
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
 }
