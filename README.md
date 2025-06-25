@@ -1,32 +1,35 @@
-# ServelessIntent Project  
+# CogniCode Project  
 
-**ServelessIntent** is a tool designed in the course of a masters thesis to help developers seamlessly leverage Backend-as-a-Service (BaaS) solutions for automated file format and language conversion.  
+**CogniCode** is a tool designed in the course of a masters thesis to help developers seamlessly leverage Backend-as-a-Service (BaaS) solutions for automated file format and language conversion.  
 
 ## ✨ Key Features  
 
-- Utilizes an **ontology-based** `services.json` file to define supported BaaS services.  
-- **Automatically detects** and constructs a pipeline of BaaS services to convert files from one format/language to another.  
+- Utilizes **ontology-based** `service_aws.jsonld` and `services_gcp.jsonld` files to define supported BaaS services. (see `ontology.md` for more details)
+- **Automatically detects** and constructs a pipeline of BaaS services to convert files from one format/language/specification to another.  
 - Uses **LLM-powered automation** to generate and execute conversions dynamically.  
 - Implements an **iterative feedback loop**, where failed conversions are analyzed, refined, and re-executed until successful.  
 
-By streamlining the conversion process, **ServelessIntent** eliminates manual intervention, making it easier to integrate file and language transformation services into your applications.  
+By streamlining the conversion process, **CogniCode** eliminates manual intervention, making it easier to integrate file and language transformation services into your applications.  
+
 
 ## 🚀 Getting Started  
 
-This guide walks you through setting up **ServelessIntent**, configuring AWS access, and defining your desired file conversions.  
+This guide walks you through setting up **CogniCode**, configuring AWS access, and defining your desired file conversions.  
 
 ---
 
 ### 📂 Prerequisites  
 
-Before using **ServelessIntent**, ensure you have the following:  
+Before using **CogniCode**, ensure you have the following:  
 
 1. **AWS CLI Installed** – Follow the [AWS CLI installation guide](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html).  
 
-2. **AWS Access & Permissions**  
+2. **Cloud Provider Access & Permissions**  
 
    - AWS Access Key ID & Secret Key configured (`aws configure`).  
    - Proper IAM permissions to use AWS BaaS services, Bedrock, and your chosen LLM.  
+   - For GCP a valid `service-account.json` files needs to be placed in the project directory containing valid credentials for a Google service account
+   - Moreover, GCP requires the activation of APIs beforehand. Therefore make sure that the used APIs are enabled in the backend.
 
 3. **Example Files Provided**  
 
@@ -53,22 +56,30 @@ All configuration is managed inside `input.json`. Below is an example:
 
 ```json
 {
-  "inputType": "pdf",
-  "inputLanguage": "english",
-  "outputType": "mp3",
-  "outputLanguage": "english",
+  "inputType": "http://example.org/data-types#PDF",
+  "inputLanguage": "http://example.org/data-types#language=english",
+  "outputType": "http://example.org/data-types#MP3",
+  "outputLanguage": "http://example.org/data-types#language=english",
   "inputFilePath": "input.pdf",
   "bucketName": "<your-bucket-name>",
-  "serviceFilePath": "services.json",
-  "llmProvider": "llama"
+  "serviceFilePath": "services_aws.json",
+  "llmProvider": "llama",
+  "cloudProvider": "aws"
 }
 ```
+
+You can use our precompiled `input_aws.json` and `input_gcp.json` by renaming either file to `input.json`.
+
+**Note**: `inputType`, `inputLanguage`, `outputType`, `outputLanguage` should follow the naming schemes of the ontology. 
+See `ontology.md` for further reference.
+
+
 
 #### 🔹 Configuration Fields Explained  
 
 | **Field**         | **Description**                                              |
 | ----------------- | ------------------------------------------------------------ |
-| `inputType`       | The format of the input file (e.g., `pdf`, `mp3`, `mp4`, `txt`). |
+| `inputType`       | The format of the input file (e.g., Should correspond to the data types used in the ontology). Currently used are  |
 | `inputLanguage`   | Language of the input file (e.g., `english`, `german`).      |
 | `outputType`      | Desired output file format (e.g., `mp3`, `txt`).             |
 | `outputLanguage`  | Language for the output file.                                |
